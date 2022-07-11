@@ -3,6 +3,7 @@ import numpy as np
 
 from circle import Circle
 from player import Player
+from network import Network
 
 pg.init()
 
@@ -12,49 +13,45 @@ screen = pg.display.set_mode(size)
 
 transparent_surface = pg.Surface((width, height), pg.SRCALPHA)
 
-circles = [player, ball] = [
-    Player(8, np.array([width / 2 - 50, height / 2]), 25, (200, 30, 30), 1.5, 2, 0.3, 0.98, 3.3),
-    Circle(1, np.array([width / 2, height / 2]), 15, (255, 255, 255), 30, 2, 0, 0.99)
-]
-
 # main game loop
 running = True
+net = Network()
+list = [p, circles] = [p, [players, ball]] = net.get_p()
+
 while running:
+    circles = [p, players, ball] = net.send(p)
+
     for event in pg.event.get():
         if event.type == pg.QUIT:
             running = False
 
-        # update shooting state of player
-        if event.type == pg.KEYDOWN and event.key == pg.K_x:
-            player.changeShootingState(True)
-        
-        if event.type == pg.KEYUP and event.key == pg.K_x:
-            player.changeShootingState(False)
+    screen.fill((70, 150, 70))
 
-    screen.fill((30, 200, 30))
+    p.move(width, height)
+    p.update_shooting_state(ball)
 
-    # get direction of player movement based on keys pressed
-    keys_pressed = pg.key.get_pressed()
-    dir = np.array([
-        np.float64(keys_pressed[pg.K_RIGHT] - keys_pressed[pg.K_LEFT]),
-        np.float64(keys_pressed[pg.K_DOWN] - keys_pressed[pg.K_UP])
-    ])
-
-    # resolve collisions
-    for i in range(len(circles)):
-        for j in range(i + 1, len(circles)):
-            circles[i].collide(circles[j])
-
-    # remove shooting state if the player already shot the ball
-    if player.shoot(ball):
-        player.changeShootingState(False)
-
-    # move, display and bounce for every circle
-    ball.move(np.zeros(2), width, height)
-    player.move(np.array(dir), width, height)
-    for circle in circles:
+    p.display(screen, transparent_surface)
+    for circle in players + [ball]:
         circle.display(screen, transparent_surface)
-        circle.bounce(width, height)
+
+
+    # # resolve collisions
+    # for i in range(len(players)):
+    #     for j in range(i + 1, len(players)):
+    #         players[i].collide(players[j])
+    #     players[i].collide(ball)
+
+    # # update circles
+    # for player in players:
+    #     player.update_shooting_state(ball)
+    #     player.move(width, height)
+
+    # ball.update(np.zeros(2), width, height)
+
+    # # display and bounce circles
+    # for circle in [ball] + players:
+    #     circle.display(screen, transparent_surface)
+    #     circle.bounce(width, height)
 
     pg.display.flip()
 

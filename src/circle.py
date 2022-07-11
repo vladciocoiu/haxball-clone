@@ -5,8 +5,6 @@ ELASTICITY = 0.3 # amount of velocity that is preserved after a collision betwee
 
 BOUNCINESS = 0.7 # amount of velocity that is preserved after a collision with a wall
 
-EPSILON = 0.02 # minimum velocity before it becomes 0, made for smoother movement
-
 class Circle:
     def __init__(self, mass, pos, r, color, max_speed, outline_thickness, acc, friction_constant):
         self.mass = mass
@@ -87,18 +85,13 @@ class Circle:
     
 
     # compute new velocity and position
-    def move(self, dir, width, height):
+    def update(self, dir, width, height):
 
         # add velocity in direction dir
         self.vel += dir * self.acc / self.mass
 
         # add friction
         self.vel *= self.friction_constant
-
-        # make the velocity 0 when it is smaller than the threshold for a smoother movement
-        for idx in range(2):
-            if abs(self.vel[idx]) < EPSILON:
-                self.vel[idx] = 0;
 
         # cap magnitude of velocity vector
         vel_mag = np.sqrt(self.vel.dot(self.vel))
