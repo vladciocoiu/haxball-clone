@@ -14,11 +14,10 @@ class Player(Circle):
         self.just_shot = False
 
     # compute movement direction based on keys pressed and update
-    def move(self, width, height):
-        keys_pressed = pg.key.get_pressed()
+    def move(self, width, height, keys_pressed):
         dir = np.array([
-            np.float64(keys_pressed[pg.K_RIGHT] - keys_pressed[pg.K_LEFT]),
-            np.float64(keys_pressed[pg.K_DOWN] - keys_pressed[pg.K_UP])
+            np.float64(keys_pressed['right'] - keys_pressed['left']),
+            np.float64(keys_pressed['down'] - keys_pressed['up'])
         ])
 
         self.update(np.array(dir), width, height)
@@ -35,14 +34,11 @@ class Player(Circle):
         screen.blit(transparent_surface, (0, 0))
         transparent_surface.fill((0,0,0,0))
 
-    def update_shooting_state(self, ball):
-
+    def update_shooting_state(self, ball, keys_pressed):
         # change shooting based on keys pressed
-        keys_pressed = pg.key.get_pressed()
-
-        if keys_pressed[pg.K_x] and not self.just_shot:
+        if keys_pressed['x'] and not self.just_shot:
             self.shooting = True
-        elif not keys_pressed[pg.K_x]:
+        elif not keys_pressed['x']:
             self.just_shot = False
             self.shooting = False
 

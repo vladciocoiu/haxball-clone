@@ -1,6 +1,7 @@
 import socket
 from _thread import *
 import numpy as np
+import pygame as pg
 import sys
 import pickle
 
@@ -37,27 +38,23 @@ def threaded_client(connection, player_id):
     reply = ""
     while True:
         try:
-            data = pickle.loads(connection.recv(2048))
-            player = players[player_id] = data
+            data = keys_pressed = pickle.loads(connection.recv(2048))
 
-            # resolve collisions
+            players[player_id].move(width, height, keys_pressed)
+            players[player_id].update_shooting_state(ball, keys_pressed)
+
             for i in range(len(players)):
-                for j in range(i + 1, len(players)):
-                    players[i].collide(players[j])
-                players[i].collide(ball)
-                players[i].shoot(ball)
+                if i != player_id:
+                    players[player_id].collide(players[i])
 
-            ball.update(np.zeros(2), width, height)
-
-            # display and bounce circles
-            for circle in [ball] + players:
-                circle.bounce(width, height)
+            players[player_id].collide(ball)
+            players[player_id].bounce(width, height)
 
             if not data:
                 print("Disconnected")
                 break
             else:
-                reply = [player, [players[i] for i in range(len(players)) if i != player_id], ball]
+                reply = [players[player_id], [players[i] for i in range(len(players)) if i != player_id], ball]
 
                 # print("Received", data)
                 # print("Sending", reply)
@@ -70,7 +67,18 @@ def threaded_client(connection, player_id):
     print("Lost connection")
     connection.close()
 
+def update_ball():
+    clock = pg.time.Clock()
+    while True:
+        clock.tick(60)
+        ball.update(np.zeros(2), width, height)
+        ball.bounce(width, height)
+
 current_players = 0
+
+# make a new thread for updating the ball
+start_new_thread(update_ball, ())
+
 while True:
     conn, addr = s.accept()
     print("Connected to", addr)

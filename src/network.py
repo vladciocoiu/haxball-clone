@@ -1,5 +1,6 @@
 import socket
 import pickle
+import pygame as pg
 
 
 class Network:

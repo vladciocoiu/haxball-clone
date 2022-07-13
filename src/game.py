@@ -18,17 +18,25 @@ running = True
 net = Network()
 list = [p, circles] = [p, [players, ball]] = net.get_p()
 
+clock = pg.time.Clock()
 while running:
-    circles = [p, players, ball] = net.send(p)
-
+    clock.tick(60)
     for event in pg.event.get():
         if event.type == pg.QUIT:
             running = False
 
-    screen.fill((70, 150, 70))
+    keys_pressed = pg.key.get_pressed()
 
-    p.move(width, height)
-    p.update_shooting_state(ball)
+    # send relevant inputs to server
+    circles = [p, players, ball] = net.send({
+        'x': keys_pressed[pg.K_x],
+        'up': keys_pressed[pg.K_UP],
+        'down': keys_pressed[pg.K_DOWN],
+        'left': keys_pressed[pg.K_LEFT],
+        'right': keys_pressed[pg.K_RIGHT],
+    })
+
+    screen.fill((70, 150, 70))
 
     p.display(screen, transparent_surface)
     for circle in players + [ball]:
